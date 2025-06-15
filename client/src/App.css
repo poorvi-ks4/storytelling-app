@@ -1,0 +1,52 @@
+body {
+  font-family: Comic Sans MS, cursive;
+  background: #fff8dc;
+  text-align: center;
+}
+
+.navbar {
+  background-color: #ffdd57;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-around;
+  font-size: 1.2rem;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #222;
+  font-weight: bold;
+}
+
+.page {
+  margin-top: 2rem;
+}
+
+.bounce {
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+form input {
+  margin: 0.5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+form button {
+  background: #00c4cc;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+}

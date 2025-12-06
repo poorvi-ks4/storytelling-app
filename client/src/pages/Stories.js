@@ -15,7 +15,9 @@ export default function Stories() {
       <h2>📚 Stories</h2>
       <ul>
         {stories.map(story => (
-          <li key={story._id}>{story.title}</li>
+         <li key={story._id}>{story.title}</li>
+        // <li key={story._id.$oid}>{story.title}</li>
+
         ))}
       </ul>
     </div>

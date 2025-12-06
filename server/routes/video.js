@@ -4,8 +4,24 @@ const Video = require('../models/Video');
 const Progress = require('../models/UserProgress');
 
 const router = express.Router();
+router.get('/', async (req, res) => {
+  try {
+    const videos = await Video.find();
 
-router.get('/', authenticateToken, async (req, res) => {
+    const formatted = videos.map(video => ({
+      ...video.toObject(),
+      _id: video._id.toString()
+    }));
+
+    console.log('Sending videos response:', formatted);
+    res.json(formatted);
+  } catch (error) {
+    console.error('Get videos error:', error);
+    res.status(500).json({ error: 'Server error fetching videos' });
+  }
+});
+
+/*router.get('/', async (req, res) => {
   try {
     const videos = await Video.find();
 
@@ -39,8 +55,8 @@ router.get('/', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Server error fetching videos' });
   }
 });
-
-router.post('/', authenticateToken, requireRole('parent'), async (req, res) => {
+*/
+router.post('/', async (req, res) => {
   try {
     const { title, description, duration, category, videoUrl, thumbnailUrl } = req.body;
     
@@ -60,37 +76,15 @@ router.post('/', authenticateToken, requireRole('parent'), async (req, res) => {
     res.status(500).json({ error: 'Server error creating video' });
   }
 });
-
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    // Optional: return progress for child
-    let progressData = null;
-    if (req.user.role === 'child') {
-      const progress = await Progress.findOne({
-        userId: req.user.id,
-        videoId: video._id
-      });
-
-      progressData = progress ? {
-        completed: progress.completed,
-        liked: progress.liked,
-        progress: progress.progress
-      } : {
-        completed: false,
-        liked: false,
-        progress: 0
-      };
-    }
-
-    res.json({
-      ...video.toObject(),
-      userProgress: progressData
-    });
+    // Just return the video as a plain object
+    res.json(video.toObject());
   } catch (error) {
     console.error('Get video error:', error);
     res.status(500).json({ error: 'Server error fetching video' });

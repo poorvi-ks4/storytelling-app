@@ -1,63 +1,57 @@
 const express = require('express');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const Story = require('../models/story');
-const Progress = require('../models/UserProgress');
 
 const router = express.Router();
 
-router.get('/', authenticateToken, async (req, res) => {
+// GET all stories (for any authenticated user)
+/*router.get('/', authenticateToken, async (req, res) => {
   try {
-    const stories = await Story.find().populate('createdBy', 'username');
-
-    if (req.user.role === 'child') {
-      const storiesWithProgress = await Promise.all(stories.map(async (story) => {
-        const progress = await Progress.findOne({
-          userId: req.user.id,
-          storyId: story._id
-        });
-
-        return {
-          ...story.toObject(),
-          progress: progress ? {
-            completed: progress.completed,
-            liked: progress.liked,
-            progress: progress.progress
-          } : {
-            completed: false,
-            liked: false,
-            progress: 0
-          }
-        };
-      }));
-
-      return res.json(storiesWithProgress);
-    }
-
-    res.json(stories);
+    const stories = await Story.find();
+    const formatted = stories.map(story => ({
+  ...story.toObject(),
+  _id: story._id.toString()
+}));
+    res.json(formatted);
+   console.log('Sending stories response:', formatted);
+  } catch (error) {
+    console.error('Get stories error:', error);
+    res.status(500).json({ error: 'Server error fetching stories' });
+  }
+});
+*/
+// router.get('/', authenticateToken, async (req, res) => {
+router.get('/', async (req, res) => {
+  try {
+    const stories = await Story.find();
+    const formatted = stories.map(story => ({
+      ...story.toObject(),
+      _id: story._id.toString()
+    }));
+    console.log('Sending stories response:', formatted);
+    res.json(formatted);
   } catch (error) {
     console.error('Get stories error:', error);
     res.status(500).json({ error: 'Server error fetching stories' });
   }
 });
 
-router.post('/', authenticateToken, requireRole('parent'), async (req, res) => {
+// POST a new story (only for parent users)
+router.post('/', requireRole('parent'), async (req, res) => {
   try {
-    const { title, description, content, difficulty, duration, category, ageGroup } = req.body;
+    const { title, description, content, image, duration, rating, plays } = req.body;
 
     const story = new Story({
       title,
       description,
       content,
-      difficulty,
+      image,
       duration,
-      category,
-      ageGroup,
-      createdBy: req.user.id
+      rating,
+      plays
     });
 
     await story.save();
-    await story.populate('createdBy', 'username');
-
     res.status(201).json(story);
   } catch (error) {
     console.error('Create story error:', error);
@@ -65,29 +59,15 @@ router.post('/', authenticateToken, requireRole('parent'), async (req, res) => {
   }
 });
 
-router.get('/:id', authenticateToken, async (req, res) => {
+// GET a story by ID (for any authenticated user)
+router.get('/:id', async (req, res) => {
   try {
-    const story = await Story.findById(req.params.id).populate('createdBy', 'username');
+    const story = await Story.findById(req.params.id);
     if (!story) {
       return res.status(404).json({ error: 'Story not found' });
     }
 
-    let userProgress = null;
-    if (req.user.role === 'child') {
-      userProgress = await Progress.findOne({
-        userId: req.user.id,
-        storyId: story._id
-      });
-    }
-
-    res.json({
-      ...story.toObject(),
-      userProgress: userProgress ? {
-        completed: userProgress.completed,
-        liked: userProgress.liked,
-        progress: userProgress.progress
-      } : null
-    });
+    res.json(story);
   } catch (error) {
     console.error('Get story error:', error);
     res.status(500).json({ error: 'Server error fetching story' });

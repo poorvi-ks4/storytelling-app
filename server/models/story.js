@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const storySchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: { type: String, required: true },
+  description: { type: String },
   content: { type: String, required: true },
-  difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Easy' },
+  image :{type :String},
   duration: { type: String, required: true },
-  category: { type: String, required: true },
-  ageGroup: { type: String, required: true },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  rating: Number,
+  plays: Number
+  
+  
 });
 
 module.exports = mongoose.model('Story', storySchema);
